@@ -1,0 +1,11 @@
+Package: jules.tools
+Type: Package
+Title: Jules Tools
+Version: 0.1.0
+Author: Julian Barg
+Maintainer: barg.julian@gmail.com
+Description: Mostly utility functions that I share across projects.
+    Mostly social science-y stuff.
+License: GNU General Public License v3.0
+Encoding: UTF-8
+LazyData: true
