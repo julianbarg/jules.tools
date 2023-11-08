@@ -10,6 +10,7 @@
 #' }
 #'
 #' @param company_name A character string representing the company name to be processed.
+#' @param remove_spaces A logical value indicating whether to remove all spaces (default is \code{TRUE}).
 #'
 #' @return A character string with the cleaned company name.
 #'
@@ -22,14 +23,14 @@
 #' @import stringr
 #'
 #' @export
-strip_names <- function(company_name) {
+strip_names <- function(company_name, remove_spaces = T) {
   types <- c(
     " co inc", " saag", " coltd", " ltd", " gmbh", " ag", " sarl", " inc",
     " limited", " ab", " llc", " sa", " ca", " pte", " co", " plc", " lp",
     " proforma", " se", " llp", " spa"
   )
   types2 <- c(" group", " corporation", " corp", " company")
-  company_name %>%
+  cleaned_names <- company_name %>%
     str_remove_all(" ?\\([^)]+\\)") %>%
     str_remove_all(" ?\\[[^\\]]+\\]") %>%
     str_remove_all(regex("^the ", ignore_case = T)) %>%
@@ -38,14 +39,16 @@ strip_names <- function(company_name) {
     str_remove_all("[:punct:]") %>%
     str_remove_all(
       regex(
-        str_flatten(c(types, ""), collapse = "$|", last = "$"),
-        ignore_case = T)
-    ) %>%
-    str_remove_all(
-      regex(
         str_flatten(c(types2, ""), collapse = "$|", last = "$"),
-        ignore_case = T)
+        ignore_case = TRUE
+      )
     ) %>%
-    str_remove_all("[:blank:]") %>%
     str_to_upper()
+
+  # Optionally remove spaces
+  if (remove_spaces) {
+    cleaned_names <- cleaned_names %>%
+      str_remove_all("[:blank:]")
+  }
+  return(cleaned_names)
 }

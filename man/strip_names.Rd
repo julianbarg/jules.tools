@@ -4,10 +4,12 @@
 \alias{strip_names}
 \title{Preprocess Company Names}
 \usage{
-strip_names(company_name)
+strip_names(company_name, remove_spaces = T)
 }
 \arguments{
 \item{company_name}{A character string representing the company name to be processed.}
+
+\item{remove_spaces}{A logical value indicating whether to remove all spaces (default is \code{TRUE}).}
 }
 \value{
 A character string with the cleaned company name.
