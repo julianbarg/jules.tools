@@ -25,21 +25,28 @@
 #' @export
 strip_names <- function(company_name, remove_spaces = T) {
   types <- c(
-    " co inc", " saag", " coltd", " ltd", " gmbh", " ag", " sarl", " inc",
-    " limited", " ab", " llc", " sa", " ca", " pte", " co", " plc", " lp",
-    " proforma", " se", " llp", " spa"
+    "\\Wco\\Winc", "\\Wsaag", "\\Wcoltd", "\\Wltd", "\\Wgmbh", "\\Wag",
+    "\\Wsarl", "\\Winc", "\\Wlimited", "\\Wab", "\\Wllc", "\\Wsa", "\\Wca",
+    "\\Wpte", "\\Wco", "\\Wplc", "\\Wlp", "\\Wproforma", "\\Wse", "\\Wllp",
+    "\\Wspa"
   )
-  types2 <- c(" group", " corporation", " corp", " company")
+  types2 <- c("\\Wgroup", "\\Wcorporation", "\\Wcorp", "\\Wcompany")
   cleaned_names <- company_name %>%
-    str_remove_all(" ?\\([^)]+\\)") %>%
-    str_remove_all(" ?\\[[^\\]]+\\]") %>%
+    str_remove_all("\\W?\\([^)]+\\)") %>%
+    str_remove_all("\\W?\\[[^\\]]+\\]") %>%
     str_remove_all(regex("^the ", ignore_case = T)) %>%
     str_remove_all(regex(", the$", ignore_case = T)) %>%
-    str_remove_all(regex(" ?& ?Co", ignore_case = T)) %>%
+    str_remove_all(regex("\\W?& ?Co", ignore_case = T)) %>%
     str_remove_all("[:punct:]") %>%
     str_remove_all(
       regex(
         str_flatten(c(types2, ""), collapse = "$|", last = "$"),
+        ignore_case = TRUE
+      )
+    ) %>%
+    str_remove_all(
+      regex(
+        str_flatten(c(types, ""), collapse = "$|", last = "$"),
         ignore_case = TRUE
       )
     ) %>%
