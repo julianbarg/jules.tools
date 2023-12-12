@@ -2,22 +2,18 @@
 % Please edit documentation in R/chatgpt.R
 \name{chatgpt}
 \alias{chatgpt}
-\title{Access OpenAI Models via OpenRouter API}
+\title{Access OpenAI Models Directly via OpenAI API}
 \usage{
 chatgpt(
   api_key,
-  referer = "http://localhost:3000",
   role,
   content,
-  model = "gpt-3.5-turbo"
+  model = "gpt-3.5-turbo",
+  referer = "http://localhost:3000"
 )
 }
 \arguments{
 \item{api_key}{A character string representing your OpenAI API key.}
-
-\item{referer}{A character string that is sent as the referer header in the request.
-Set to your personal website or "http://localhost:3000" for testing purposes.
-See more at https://openrouter.ai/docs.}
 
 \item{role}{A character string specifying the role for the interaction (user/system).}
 
@@ -25,21 +21,24 @@ See more at https://openrouter.ai/docs.}
 
 \item{model}{A character string specifying the model to be used.
 Defaults to "gpt-3.5-turbo".}
+
+\item{referer}{A character string that is sent as the referer header in the request.
+Set to your personal website or "http://localhost:3000" for testing purposes.}
 }
 \value{
 The HTTP response object containing the model's response.
 }
 \description{
-This function provides a way to interact with the OpenAI models using the OpenRouter API.
-It sets up an HTTP POST request to the OpenRouter service to get a response from the specified model.
+This function provides a way to directly interact with the OpenAI models using OpenAI's API.
+It sets up an HTTP POST request to the OpenAI service to get a response from the specified model.
 }
 \examples{
 \dontrun{
 response <- chatgpt_xl(
   api_key = "your_api_key_here",
-  referer = "http://localhost:3000",
   role = "user",
-  content = "Who will win the next Darwin award?"
+  content = "Who will win the next Darwin award?",
+  referer = "http://localhost:3000"
 )
 print(content(response))
 }
