@@ -4,26 +4,24 @@
 \alias{chatgpt}
 \title{Access OpenAI Models Directly via OpenAI API}
 \usage{
-chatgpt(
-  api_key,
-  role,
-  content,
-  model = "gpt-3.5-turbo",
-  referer = "http://localhost:3000"
-)
+chatgpt(api_key, content, role = NA, model = "gpt-4o", json_out = T, seed = NA)
 }
 \arguments{
 \item{api_key}{A character string representing your OpenAI API key.}
 
-\item{role}{A character string specifying the role for the interaction (user/system).}
-
 \item{content}{A character string or list specifying the content for the interaction.}
 
-\item{model}{A character string specifying the model to be used.
-Defaults to "gpt-3.5-turbo".}
+\item{role}{A character string specifying the role for the interaction (system). 
+Defaults to "You are a helpful assistant." 
+When json_out is TRUE, defaults to "You are a helpful assistant designed to output JSON."}
 
-\item{referer}{A character string that is sent as the referer header in the request.
-Set to your personal website or "http://localhost:3000" for testing purposes.}
+\item{model}{A character string specifying the model to be used.
+Defaults to "gpt-4o".}
+
+\item{json_out}{A logical value to indicate whether the response should be formatted as json rather than as a text string. 
+Defaults to TRUE.}
+
+\item{seed}{A string that is used for used to set a seed value for the random number generator used by the model.}
 }
 \value{
 The HTTP response object containing the model's response.
@@ -34,13 +32,11 @@ It sets up an HTTP POST request to the OpenAI service to get a response from the
 }
 \examples{
 \dontrun{
-response <- chatgpt_xl(
+response <- chatgpt(
   api_key = "your_api_key_here",
-  role = "user",
-  content = "Who will win the next Darwin award?",
-  referer = "http://localhost:3000"
+  content = "Who will win the next Darwin award?"
 )
-print(content(response))
+print(httr::content(response))
 }
 
 }

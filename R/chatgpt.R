@@ -4,62 +4,70 @@
 #' It sets up an HTTP POST request to the OpenAI service to get a response from the specified model.
 #'
 #' @param api_key A character string representing your OpenAI API key.
-#' @param role A character string specifying the role for the interaction (user/system).
 #' @param content A character string or list specifying the content for the interaction.
+#' @param role A character string specifying the role for the interaction (system). 
+#'   Defaults to "You are a helpful assistant." 
+#'   When json_out is TRUE, defaults to "You are a helpful assistant designed to output JSON."
 #' @param model A character string specifying the model to be used.
-#'   Defaults to "gpt-3.5-turbo".
-#' @param referer A character string that is sent as the referer header in the request.
-#'   Set to your personal website or "http://localhost:3000" for testing purposes.
+#'   Defaults to "gpt-4o".
+#' @param json_out A logical value to indicate whether the response should be formatted as json rather than as a text string. 
+#'   Defaults to TRUE. 
+#' @param seed A string that is used for used to set a seed value for the random number generator used by the model.
 #'
 #' @return The HTTP response object containing the model's response.
 #'
 #' @examples
 #' \dontrun{
-#' response <- chatgpt_xl(
+#' response <- chatgpt(
 #'   api_key = "your_api_key_here",
-#'   role = "user",
-#'   content = "Who will win the next Darwin award?",
-#'   referer = "http://localhost:3000"
+#'   content = "Who will win the next Darwin award?"
 #' )
-#' print(content(response))
+#' print(httr::content(response))
 #' }
 #'
 #' @export
-chatgpt <- function(
-    api_key,
-    role,
-    content,
-    model = "gpt-3.5-turbo", # Default model
-    referer = "http://localhost:3000" # Default referer for testing
-) {
+chatgpt <- function(api_key,
+                    content,
+                    role = NA,
+                    model = "gpt-4o",
+                    json_out = T,
+                    seed = NA) {
+  # Get correct role
+  if (!is.na(role)) {
+    role_ = role
+  } else if (json_out) {
+    role_ = "You are a helpful assistant designed to output JSON."
+  } else {
+    role = "You are a helpful assistant."
+  }
   
-  # URL for the OpenAI API
-  openai_url <- "https://api.openai.com/v1/chat/completions"
+  # Set up headers for the POST request.
+  headers <- httr::add_headers(c(
+    `Content-Type` = "application/json",
+    Authorization = paste("Bearer", api_key)
+  ))
   
-  # Set up headers for the HTTP request
-  headers <- c(
-    "Content-Type" = "application/json",
-    "Authorization" = paste("Bearer", api_key),
-    "Referer" = referer
-  )
+  # Prepare data payload
+  body_payload <- list(model = model,
+                       messages = list(
+                         list(role = "system",
+                              content = role_),
+                         list(role = "user",
+                              content = content)
+                       ))
+  if (json_out) {
+    body_payload$response_format = list(type = "json_object")
+  }
+  if (!is.na(seed)) {
+    body_payload$seed = seed
+  }
   
-  # Prepare the data payload for the POST request
-  data <- list(
-    model = model,
-    messages = list(
-      list(role = role, content = content)
-    )
-  )
-  
-  # Make the POST request to the OpenAI API
   response <- httr::POST(
-    url = openai_url,
-    httr::add_headers(.headers = headers),
-    body = jsonlite::toJSON(data, auto_unbox = TRUE),
-    encode = "json",
-    httr::timeout(1500) # Set timeout for the request
+    url = "https://api.openai.com/v1/chat/completions",
+    headers,
+    body = jsonlite::toJSON(body_payload, auto_unbox = TRUE),
+    encode = "json"
   )
   
-  # Return the response object from the API
   return(response)
 }
