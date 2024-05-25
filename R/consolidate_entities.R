@@ -40,7 +40,10 @@ consolidate_entities <- function(api_key,
   spellings, or extraneous letters. For instance, you may see \"ExxonMobil\", 
   \"Exxon Mobil\", and  \"ExxonMobil Corporation,\" and you should consolidate 
   all to the same spelling, ideally the smallest common denominator, i.e., 
-  \"ExxonMobil\". You should respond to every request with only a json object 
+  \"ExxonMobil\". You may also see entries where a subunit is listed. In that 
+  instance, consolidate entries with different subunits to the same parent unit.
+  For instance, \"BP Europe\" and \"BP America\" should both become \"BP.\"
+  You should respond to every request with only a json object 
   with all the original string and proposed consolidation. Where the entity 
   needs no consolitation, simply print the original string twice. Your response 
   should be an array of arrays named \"entities\" just to save some space. Make 
