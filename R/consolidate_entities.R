@@ -43,6 +43,8 @@ consolidate_entities <- function(api_key,
   \"ExxonMobil\". You may also see entries where a subunit is listed. In that 
   instance, consolidate entries with different subunits to the same parent unit.
   For instance, \"BP Europe\" and \"BP America\" should both become \"BP.\"
+  The same goes for different business units. That is, \"Chevron Pipe Line
+  Company\" and \"Chevron Refining\" should both become \"Chevron\".
   You should respond to every request with only a json object 
   with all the original string and proposed consolidation. Where the entity 
   needs no consolitation, simply print the original string twice. Your response 
