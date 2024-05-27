@@ -45,6 +45,9 @@ consolidate_entities <- function(api_key,
   For instance, \"BP Europe\" and \"BP America\" should both become \"BP.\"
   The same goes for different business units. That is, \"Chevron Pipe Line
   Company\" and \"Chevron Refining\" should both become \"Chevron\".
+  If multiple entities are mentioned in one entry, but they are all part of the
+  same overarching company, you should consolidate the entry to the level
+  of the overarching entity.
   You should respond to every request with only a json object 
   with all the original string and proposed consolidation. Where the entity 
   needs no consolitation, simply print the original string twice. Your response 
