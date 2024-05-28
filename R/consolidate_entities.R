@@ -1,9 +1,9 @@
 #' Consolidate variations in spelling for entity names using ChatGPT
 #' 
-#' This function sends a vector of organization names along with instructions to 
-#' the ChatGPT API to consolidate variations in spelling.
+#' This function sends a vector of entity names along with instructions to 
+#' the OpenAI API to consolidate variations in spelling.
 #' @param api_key A character string representing your OpenAI API key.
-#' @param entities A vector of organization names.
+#' @param entities A vector of entity names.
 #' @param model A character string specifying the model to be used.
 #'   Defaults to "gpt-4o".
 #' @param seed A string that is used for used to set a seed value for the random 
@@ -49,7 +49,7 @@ consolidate_entities <- function(api_key,
   same overarching company, you should consolidate the entry to the level
   of the overarching entity.
   You should respond to every request with only a json object 
-  with all the original string and proposed consolidation. Where the entity 
+  with all the original strings and proposed consolidations. Where the entity 
   needs no consolitation, simply print the original string twice. Your response 
   should be an array of arrays named \"entities\" just to save some space. Make 
   sure the changes are unequivocal, that is, don't repeat the same entry 
@@ -83,9 +83,10 @@ consolidate_entities <- function(api_key,
   suggestions for consolidations of the entities at the very bottom. Here the 
   coded entities:"
   code_later_message <- "Next, here is a list of entities that we will have 
-  you code later. Keep in mind that you should not keep these in your response
-  you should keep these entities in mind when you code the entities in this 
-  chunk for the lowest common denomonator consolidation across all chunks:"
+  you or another research assistant code later. Keep in mind that you should 
+  not include these in your response, but you should condider these entities 
+  when you code the entities in this chunk for the lowest common 
+  denomonator consolidation across all chunks:"
   current_chunk_message <- "And finally, here are the entities that you should 
   code in your immediate response. That is, in your next response you must only
   include all the original chunks from this list below and your proposed 
@@ -93,6 +94,12 @@ consolidate_entities <- function(api_key,
   the previous and following chunks, but you cannot include them in the list
   that you respond with. Here the entities to code right now, separated by
   newlines:"
+  
+  # Number of entities in number of characters to include in one chunk. 
+  # Based on sending a long request and seeing when it cuts for length and then
+  # reducing by 30%. So no exact science.
+  # I will occasionally increase this number until I run into trouble.
+  chunk_size <- 5100 
   
   # Function to call in for consolidation
   consolidate_call <- function(call, chunk, chunk_max){
@@ -103,11 +110,11 @@ consolidate_entities <- function(api_key,
     if (message$choices[[1]]$finish_reason == "stop") {
       message(paste0("Query successful (", chunk, "/", chunk_max, ")."))
       # Could add a tryCatch here if this conversion proves tricky.
-      consolidated <- jsonlite::fromJSON(message$choices[[1]]$message$content) |>
+      consolidate_now <- jsonlite::fromJSON(message$choices[[1]]$message$content) |>
         as.data.frame() |>
         `colnames<-`(c("entity", "consolidated"))
       message("Returning dataframe.")
-      return(consolidated)
+      return(consolidate_now)
     } else {
       print(message)
       stop("Query not successful. See last API response above.")
@@ -117,7 +124,7 @@ consolidate_entities <- function(api_key,
   counts <- data.frame(entities = entities)
   counts$n <- nchar(counts$entities)
   counts$cum <- cumsum(counts$n)
-  counts$chunk <- floor(counts$cum / 5000) + 1
+  counts$chunk <- floor(counts$cum / chunk_size) + 1
   
   # Skip over the complexity of chunking for short queries.  
   if (max(counts$chunk) == 1) {
@@ -170,6 +177,7 @@ consolidate_entities <- function(api_key,
       "\n\n",
       paste(current, collapse = "\n")
     )
+    consolidate_task
   }
   
   for (chunk in 1:max(counts$chunk)) {
