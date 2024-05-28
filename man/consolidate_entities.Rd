@@ -9,7 +9,7 @@ consolidate_entities(api_key, entities, model = "gpt-4o", seed = NA)
 \arguments{
 \item{api_key}{A character string representing your OpenAI API key.}
 
-\item{entities}{A vector of organization names.}
+\item{entities}{A vector of entity names.}
 
 \item{model}{A character string specifying the model to be used.
 Defaults to "gpt-4o".}
@@ -22,8 +22,8 @@ A dataframe with the submitted strings in the first column and
    corrections in the second column.
 }
 \description{
-This function sends a vector of organization names along with instructions to 
-the ChatGPT API to consolidate variations in spelling.
+This function sends a vector of entity names along with instructions to 
+the OpenAI API to consolidate variations in spelling.
 }
 \examples{
 \dontrun{

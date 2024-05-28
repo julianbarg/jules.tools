@@ -30,6 +30,8 @@
 #'                        description = description, examples = examples)
 #'    
 #' }
+#' 
+#' @export
 categorize_entities <- function(api_key, 
                                 entities, 
                                 description, 
@@ -124,7 +126,7 @@ categorize_entities <- function(api_key,
     coded <- examples
     colnames(coded) <- c("entity", "label")
   } else {
-    coded <- dataframe(entity = NULL, label = NULL)
+    coded <- data.frame(entity = NULL, label = NULL)
   }
   
   prepare_chunk <- function(chunked_df, chunk_){
