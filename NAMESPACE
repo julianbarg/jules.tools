@@ -3,5 +3,6 @@
 export(categorize_entities)
 export(chatgpt)
 export(consolidate_entities)
+export(llmatch)
 export(strip_names)
 import(stringr)
