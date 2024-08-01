@@ -13,4 +13,6 @@ RoxygenNote: 7.3.1
 Imports:
     stringr,
     httr,
-    jsonlite
+    jsonlite,
+    readr,
+    pandoc
