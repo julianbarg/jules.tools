@@ -20,6 +20,8 @@
 #' @export
 
 make_pandoc_table <- function(df, file, max_width = 80){
+  
+  df <- data.frame(lapply(df, as.character))
 
   make_string <- function(df_){
     csv_string <- readr::format_csv(df_)
