@@ -41,11 +41,12 @@ make_pandoc_table <- function(df, file, max_width = 80){
   }
   
   replace_space <- function(long_str){
-    # Not entirely precise but precise enoughs
+    # Not entirely precise but precise enough
     lines <- stringr::str_locate_all(long_str, "[\n]|^|$")[[1]][,1]
     # lines <- unlist(gregexpr("[\n]|^|$", long_str)) # built-in does not work 
     spaces <- unlist(gregexpr(" ", long_str))
-    if (spaces == -1){
+    # That operation returns -1 if there are no spaces, otherwise it is a vector
+    if (all(spaces %in% -1)){
       message("No spaces found to insert linebreak, writing as-is.")
       return(NULL)
     }
