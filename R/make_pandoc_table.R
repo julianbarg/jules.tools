@@ -5,6 +5,7 @@
 #' 
 #' @param df Dataframe to be converted.
 #' @param file Target to write resulting markdown to.
+#' @param max_width Target line width.
 #' 
 #' @examples
 #' \dontrun{
@@ -20,63 +21,71 @@
 #' @export
 
 make_pandoc_table <- function(df, file, max_width = 80){
-  
   df <- data.frame(lapply(df, as.character))
-
+  
+  # Compute the effective width of a cell (its longest line)
+  effective_width <- function(cell) {
+    max(nchar(unlist(str_split(cell, "\n"))))
+  }
+  
+  # Convert the dataframe to a markdown table string using pandoc
   make_string <- function(df_){
     csv_string <- readr::format_csv(df_)
-    md_string <- pandoc::pandoc_convert(
+    pandoc::pandoc_convert(
       text = csv_string, 
       from = "csv", 
       to = "markdown",
       version = "system"
-      )
-    md_string
+    )
   }
   
+  # Check the maximum line width in the markdown string
   check_linewidth <- function(md_string){
-    stringr::str_split(md_string, "\n") |> # strsplit cannot handle empty string
-      sapply(nchar) |>
-      max()
-  }
-  
-  replace_space <- function(long_str){
-    # Not entirely precise but precise enough
-    lines <- stringr::str_locate_all(long_str, "[\n]|^|$")[[1]][,1]
-    # lines <- unlist(gregexpr("[\n]|^|$", long_str)) # built-in does not work 
-    spaces <- unlist(gregexpr(" ", long_str))
-    # That operation returns -1 if there are no spaces, otherwise it is a vector
-    if (all(spaces %in% -1)){
-      message("No spaces found to insert linebreak, writing as-is.")
-      return(NULL)
-    }
-    
-    break_rank <- abs(outer(lines, spaces, FUN = "-")) |>
-      apply(2, min) |>
-      which.max()
-    break_loc <- spaces[break_rank]
-    substr(long_str, break_loc, break_loc) <- "\n"
-    
-    long_str
+    max(sapply(str_split(md_string, "\n"), nchar))
   }
   
   md_string <- make_string(df)
   
-  while (check_linewidth(md_string) > max_width){
-    # We should really figure out first whether there are rows that don't 
-    # include spaces, but I will not handle that edge case for now.
-    col_sd <- apply(df, 2, function(row) sd(sapply(row, check_linewidth)))
-    # To lazy to handle ties right now but they could occur.
-    shorten_col <- names(col_sd[which.max(col_sd)])
-    # This conveniently returns only the first match
-    shorten_row <- which.max(sapply(df[[shorten_col]], check_linewidth))
-    
-    shortened_entry <- replace_space(df[shorten_row, shorten_col])
-    if (is.null(shortened_entry)) {
+  # Candidate columns that we can try to modify
+  candidate_cols <- names(df)
+  
+  while (check_linewidth(md_string) > max_width) {
+    if(length(candidate_cols) == 0){
+      message("No modifiable columns left, writing as-is.")
       break
     }
     
-    df[shorten_row, shorten_col] <- shortened_entry
+    # Identify the candidate column with the highest standard deviation of cell widths
+    col_sd <- apply(df[, candidate_cols, drop=FALSE], 2, function(col) 
+      stats::sd(sapply(col, effective_width))
+    )
+    shorten_col <- names(col_sd)[which.max(col_sd)]
+    
+    # Within that column, select the row with the maximum effective width
+    shorten_row <- which.max(sapply(df[[shorten_col]], effective_width))
+    offending_text <- df[shorten_row, shorten_col]
+    
+    # Check if the longest word in the cell dictates its effective width.
+    # If so, exclude this column from further processing.
+    words <- unlist(str_split(offending_text, "\\s+"))
+    if (length(words) == 0 || max(nchar(words)) >= effective_width(offending_text)) {
+      message("Longest word dictates cell width in column '", shorten_col, "', excluding column from further processing.")
+      candidate_cols <- setdiff(candidate_cols, shorten_col)
+      md_string <- make_string(df)
+      next
+    }
+    
+    # Determine current line count and reduce the width iteratively to force one extra line break
+    current_lines <- length(str_split(offending_text, "\n")[[1]])
+    new_width <- effective_width(offending_text) - 1
+    repeat {
+      wrapped_text <- str_wrap(offending_text, width = new_width)
+      new_lines <- length(str_split(wrapped_text, "\n")[[1]])
+      if (new_lines > current_lines || new_width <= 1) break
+      new_width <- new_width - 1
+    }
+    
+    df[shorten_row, shorten_col] <- wrapped_text
     md_string <- make_string(df)
   }
   

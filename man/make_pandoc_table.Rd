@@ -10,6 +10,8 @@ make_pandoc_table(df, file, max_width = 80)
 \item{df}{Dataframe to be converted.}
 
 \item{file}{Target to write resulting markdown to.}
+
+\item{max_width}{Target line width.}
 }
 \description{
 This function uses write_csv and pandoc to convert a dataframe into a 

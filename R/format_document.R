@@ -6,6 +6,7 @@
 #' 
 #' @param x A numeric value.
 #' @return A character string token to be processed by the knitr inline hook.
+#' @importFrom knitr knit_hooks
 #' @export
 as_digits <- function(x) {
   paste0("##DIGITS##", x)
@@ -21,9 +22,9 @@ as_digits <- function(x) {
 #' @export
 
 format_document <- function() {
-  if (!requireNamespace("knitr", quietly = TRUE)) {
-    stop("The 'knitr' package is required but not available.")
-  }
+  # if (!base::requireNamespace("knitr", quietly = TRUE)) {
+  #   stop("The 'knitr' package is required but not available.")
+  # }
   
   # Define helper functions within the activation function
   is_numeric_convertible <- function(x) {
