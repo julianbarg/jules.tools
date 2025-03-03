@@ -68,8 +68,13 @@ make_pandoc_table <- function(df, file, max_width = 80){
     # Check if the longest word in the cell dictates its effective width.
     # If so, exclude this column from further processing.
     words <- unlist(str_split(offending_text, "\\s+"))
-    if (length(words) == 0 || max(nchar(words)) >= effective_width(offending_text)) {
-      message("Longest word dictates cell width in column '", shorten_col, "', excluding column from further processing.")
+    longest_word_len <- if(length(words) > 0) max(nchar(words)) else 0
+    
+    # If the effective width is dictated by the longest word or if the column title is longer,
+    # then no further wrapping will help; exclude the column from further processing.
+    if(length(words) == 0 || effective_width(offending_text) == longest_word_len || 
+       nchar(shorten_col) >= longest_word_len) {
+      message("Column '", shorten_col, "' cannot be shortened further, excluding it from processing.")
       candidate_cols <- setdiff(candidate_cols, shorten_col)
       md_string <- make_string(df)
       next
@@ -78,6 +83,7 @@ make_pandoc_table <- function(df, file, max_width = 80){
     # Determine current line count and reduce the width iteratively to force one extra line break
     current_lines <- length(str_split(offending_text, "\n")[[1]])
     new_width <- effective_width(offending_text) - 1
+    
     repeat {
       wrapped_text <- str_wrap(offending_text, width = new_width)
       new_lines <- length(str_split(wrapped_text, "\n")[[1]])
@@ -91,25 +97,3 @@ make_pandoc_table <- function(df, file, max_width = 80){
   
   writeLines(md_string, file)
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

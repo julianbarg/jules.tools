@@ -1,7 +1,7 @@
 Package: jules.tools
 Type: Package
 Title: Jules Tools
-Version: 0.1.1
+Version: 0.1.2
 Author: Julian Barg
 Maintainer: Julian Barg <barg.julian@gmail.com>
 Description: Mostly utility functions that I share across projects.
